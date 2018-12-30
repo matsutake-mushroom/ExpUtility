@@ -1,26 +1,26 @@
 #pragma once
 #include "Serial.h"
 
-Serial::Serial(){
+Serial::Serial(int baudrate){
 	hComm = CreateFile(
-		"COM3",                       /* ƒVƒŠƒAƒ‹ƒ|[ƒg‚Ì•¶š—ñ */
-		GENERIC_READ | GENERIC_WRITE, /* ƒAƒNƒZƒXƒ‚[ƒh */
-		0,                            /* ‹¤—Lƒ‚[ƒh */
-		NULL,                         /* ƒZƒLƒ…ƒŠƒeƒB‘®« */
-		OPEN_EXISTING,                /* ì¬ƒtƒ‰ƒO */
-		FILE_ATTRIBUTE_NORMAL,        /* ‘®« */
-		NULL                          /* ƒeƒ“ƒvƒŒ[ƒg‚Ìƒnƒ“ƒhƒ‹ */
+		"COM3",                       /* ï¿½Vï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½|ï¿½[ï¿½gï¿½Ì•ï¿½ï¿½ï¿½ï¿½ï¿½ */
+		GENERIC_READ | GENERIC_WRITE, /* ï¿½Aï¿½Nï¿½Zï¿½Xï¿½ï¿½ï¿½[ï¿½h */
+		0,                            /* ï¿½ï¿½ï¿½Lï¿½ï¿½ï¿½[ï¿½h */
+		NULL,                         /* ï¿½Zï¿½Lï¿½ï¿½ï¿½ï¿½ï¿½eï¿½Bï¿½ï¿½ï¿½ï¿½ */
+		OPEN_EXISTING,                /* ï¿½ì¬ï¿½tï¿½ï¿½ï¿½O */
+		FILE_ATTRIBUTE_NORMAL,        /* ï¿½ï¿½ï¿½ï¿½ */
+		NULL                          /* ï¿½eï¿½ï¿½ï¿½vï¿½ï¿½ï¿½[ï¿½gï¿½Ìƒnï¿½ï¿½ï¿½hï¿½ï¿½ */
 	);
 
-	GetCommState(hComm, &dcb); /* DCB ‚ğæ“¾ */
+	GetCommState(hComm, &dcb); /* DCB ï¿½ï¿½æ“¾ */
 		
 	dcb.DCBlength = sizeof(DCB);
-	dcb.BaudRate = 115200;     /* “]‘—‘¬“x‚ğİ’è*/
+	dcb.BaudRate = baudrate;     /* ï¿½]ï¿½ï¿½ï¿½ï¿½ï¿½xï¿½ï¿½İ’ï¿½*/
 	dcb.fParity = FALSE;
 	dcb.ByteSize = 8;
 	dcb.Parity = NOPARITY;
 	dcb.StopBits = ONESTOPBIT;
-	SetCommState(hComm, &dcb); /* DCB ‚ğİ’è */
+	SetCommState(hComm, &dcb); /* DCB ï¿½ï¿½İ’ï¿½ */
 
 }
 
@@ -28,14 +28,39 @@ Serial::~Serial() {
 	Close();
 }
 
-//ƒVƒŠƒAƒ‹‚Åƒf[ƒ^‚ğ“]‘—
+//ï¿½Vï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½Åƒfï¿½[ï¿½^ï¿½ï¿½]ï¿½ï¿½
 void Serial::Send(short data) {
 	DWORD dwWritten;
 	WriteFile(hComm, &data, sizeof(short), &dwWritten, NULL);
 }
 
-//ƒVƒŠƒAƒ‹ƒ|[ƒg‚ğ•Â‚¶‚é
+//ï¿½Vï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½|ï¿½[ï¿½gï¿½ï¿½Â‚ï¿½ï¿½ï¿½
 void Serial::Close() {
 	CloseHandle(hComm);
 }
 
+int Serial::available()
+{
+	//å—ä¿¡ãƒ‡ãƒ¼ã‚¿æ•°ã‚’èª¿ã¹ã‚‹
+	DWORD errors;
+	COMSTAT comStat;
+	ClearCommError(hComm, &errors, &comStat);
+ 
+	int lengthOfRecieved = comStat.cbInQue; // å—ä¿¡ã—ãŸãƒ¡ãƒƒã‚»ãƒ¼ã‚¸é•·ã‚’å–å¾—ã™ã‚‹
+ 
+	return lengthOfRecieved;
+}
+ 
+unsigned char Serial::read()
+{
+	unsigned char buf; // å—ä¿¡ãƒ‡ãƒ¼ã‚¿æ ¼ç´ç”¨
+	DWORD numberOfRead; // å®Ÿéš›ã«å—ä¿¡ã—ãŸãƒã‚¤ãƒˆæ•°
+ 
+	//ãƒ‡ãƒ¼ã‚¿å—ä¿¡
+	bool result = ReadFile(hComm, &buf, 1, &numberOfRead, NULL);
+	if (result == false){
+		return 'a';
+	}else{
+		return buf;
+	}
+}
