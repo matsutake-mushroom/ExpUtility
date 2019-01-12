@@ -13,7 +13,7 @@ public:
 	//�V���A���Ńf�[�^��]��
 	void Send(short data);
 	int available();
-	unsigned char read();
+	char read();
 	//�V���A���|�[�g�����
 	void Close();
 };

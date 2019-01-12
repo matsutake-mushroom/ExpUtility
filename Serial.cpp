@@ -51,9 +51,9 @@ int Serial::available()
 	return lengthOfRecieved;
 }
  
-unsigned char Serial::read()
+char Serial::read()
 {
-	unsigned char buf; // 受信データ格納用
+	char buf; // 受信データ格納用
 	DWORD numberOfRead; // 実際に受信したバイト数
  
 	//データ受信
